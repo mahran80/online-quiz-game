@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Results</title>
+</head>
+<body>
+    <h1>Quiz Results</h1>
+    <p>You got {{ score }} out of {{ total }} questions correct!</p>
+
+    <h2>Question Breakdown:</h2>
+    <ul>
+        {% for result in results %}
+            <li>
+                <strong>Question:</strong> {{ result.question }}<br>
+                <strong>Your Answer:</strong> {{ result.user_answer }}<br>
+                <strong>Correct Answer:</strong> {{ result.correct_answer }}<br>
+                <strong>Result:</strong> 
+                {% if result.is_correct %}
+                    ✅ Correct!
+                {% else %}
+                    ❌ Incorrect
+                {% endif %}
+            </li>
+            <hr>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'questions' %}">Try Again</a>
+
+</body>
+</html>

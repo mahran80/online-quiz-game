@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Questions</title>
+    <script>
+        function submitQuiz() {
+            let form = document.getElementById('quizForm');
+            let formData = new FormData(form);
+
+            fetch("{% url 'quiz:submit_answers' %}", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("Error submitting quiz!");
+                } else {
+                    let resultHTML = `<h2>Your Score: ${data.score} / ${data.total}</h2>`;
+                    resultHTML += `<h3>Question Breakdown:</h3><ul>`;
+
+                    data.results.forEach(result => {
+                        resultHTML += `
+                            <li>
+                                <strong>Question:</strong> ${result.question} <br>
+                                <strong>Your Answer:</strong> ${result.user_answer} <br>
+                                <strong>Correct Answer:</strong> ${result.correct_answer} <br>
+                                <strong>Result:</strong> 
+                                ${result.is_correct ? '✅ Correct!' : '❌ Incorrect'}
+                            </li>
+                            <hr>
+                        `;
+                    });
+
+                    resultHTML += `</ul>`;
+                    document.getElementById("result").innerHTML = resultHTML;
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    </script>
+</head>
+<body>
+
+    <h1>Quiz Questions</h1>
+    <form id="quizForm">
+        {% csrf_token %}
+        
+        {% for question in questions %}
+            <h3>{{ question.title }}</h3>
+            {% for answer in question.answer.all %}
+                <label>
+                    <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required> 
+                    {{ answer.answer_text }}
+                </label><br>
+            {% endfor %}
+            <hr>
+        {% endfor %}
+        
+        <button type="button" onclick="submitQuiz()">Submit</button>
+    </form>
+
+    <div id="result"></div>
+
+</body>
+</html>
